@@ -25,6 +25,9 @@ using namespace dev::eth;
 void FuzzerUtil::runCompiler(string _input)
 {
 	string outputString(solidity_compile(_input.c_str(), nullptr));
+	// This should be safe given the above copies the output.
+	solidity_free();
+
 	Json::Value output;
 	if (!jsonParseStrict(outputString, output))
 	{
