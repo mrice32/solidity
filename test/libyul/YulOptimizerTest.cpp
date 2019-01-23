@@ -23,6 +23,7 @@
 
 #include <libyul/optimiser/BlockFlattener.h>
 #include <libyul/optimiser/VarDeclInitializer.h>
+#include <libyul/optimiser/VarNameCleaner.h>
 #include <libyul/optimiser/Disambiguator.h>
 #include <libyul/optimiser/CommonSubexpressionEliminator.h>
 #include <libyul/optimiser/NameCollector.h>
@@ -111,6 +112,8 @@ bool YulOptimizerTest::run(ostream& _stream, string const& _linePrefix, bool con
 	}
 	else if (m_optimizerStep == "varDeclInitializer")
 		VarDeclInitializer{}(*m_ast);
+	else if (m_optimizerStep == "varNameCleaner")
+		VarNameCleaner{}(*m_ast);
 	else if (m_optimizerStep == "forLoopInitRewriter")
 	{
 		disambiguate();
