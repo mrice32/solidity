@@ -608,6 +608,7 @@ Through ``abi.encodePacked()``, Solidity supports a non-standard packed mode whe
 
 - types shorter than 32 bytes are neither zero padded nor sign extended and
 - dynamic types are encoded in-place and without the length.
+- array and struct elements are padded, but still encoded in-place
 
 This packed mode is mainly used for indexed event parameters.
 
@@ -622,12 +623,18 @@ As an example, the encoding of ``int16(-1), bytes1(0x42), uint16(0x03), string("
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ string("Hello, world!") without a length field
 
 More specifically:
- - Each value type takes as many bytes as its range has.
- - The encoding of a struct or fixed-size array is the concatenation of the
-   encoding of its members/elements without any separator or padding.
- - Mapping members of structs are ignored as usual.
- - Dynamically-sized types like ``string``, ``bytes`` or ``uint[]`` are encoded without
-   their length field.
+ - During the encoding, everything is encoded in-place, which means that there is
+   no distinction between head and tail as in the ABI encoding and the length
+   of an array is not encoded.
+ - The direct arguments of ``abi.encodePacked`` are concatenated without padding,
+   but padding is added as soon as an array or struct is entered.
+ - The encoding of a struct or array is the concatenation of the
+   encoding of its members/elements **with** padding, ignoring mapping members.
+ - Dynamically-sized types like ``string``, ``bytes`` or ``uint[]`` are encoded
+   without their length field.
+ - The encoding of ``string`` or ``bytes`` does not apply padding at the end
+   unless it is part of an array or struct (then it is padded to a multiple of
+   32 bytes).
 
 In general, the encoding is ambiguous as soon as there are two dynamically-sized elements,
 because of the missing length field.
@@ -636,3 +643,12 @@ If padding is needed, explicit type conversions can be used: ``abi.encodePacked(
 
 Since packed encoding is not used when calling functions, there is no special support
 for prepending a function selector. Since the encoding is ambiguous, there is no decoding function.
+
+.. warning::
+
+  If you use ``keccak256(abi.encodePacked(a, b))`` and both ``a`` and ``b`` are dynamic types,
+  it is easy to craft collisions in the hash value by moving parts of ``a`` into ``b`` and
+  vice-versa. More specifically, ``abi.encodePacked("a", "bc") == abi.encodePacked("ab", "c")``.
+  If you use ``abi.encodePacked`` for signatures, authentication or data integrity, make
+  sure to always use the same types and check that at most one of them is dynamic.
+  If not, use ``abi.encode`` instead.
