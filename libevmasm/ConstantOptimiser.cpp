@@ -30,10 +30,10 @@ unsigned ConstantOptimisationMethod::optimiseConstants(
 	bool _isCreation,
 	size_t _runs,
 	solidity::EVMVersion _evmVersion,
-	Assembly& _assembly,
-	AssemblyItems& _items
+	Assembly& _assembly
 )
 {
+	AssemblyItems& _items = _assembly.itemsMutable();
 	unsigned optimisations = 0;
 	map<AssemblyItem, size_t> pushes;
 	for (AssemblyItem const& item: _items)
