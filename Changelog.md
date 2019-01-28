@@ -1,6 +1,7 @@
 ### 0.5.4 (unreleased)
 
 Bugfixes:
+ * Code generator: Defensively pad allocation of creationCode and runtimeCode to multiples of 32 bytes.
  * Type system: Properly report packed encoded size for arrays and structs (mostly unused until now).
 
 
