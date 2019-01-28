@@ -28,29 +28,6 @@ The key point is that the calling contract needs to know about the function it i
 See `ping.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_ping.sol>`_
 and `pong.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_pong.sol>`_.
 
-How do I initialize a contract with only a specific amount of wei?
-==================================================================
-
-Currently the approach is a little ugly, but there is little that can be done to improve it.
-In the case of a ``contract A`` calling a new instance of ``contract B``, parentheses have to be used around
-``new B`` because ``B.value`` would refer to a member of ``B`` called ``value``.
-You will need to make sure that you have both contracts aware of each other's presence and that ``contract B`` has a ``payable`` constructor.
-In this example::
-
-    pragma solidity ^0.5.0;
-
-    contract B {
-        constructor() public payable {}
-    }
-
-    contract A {
-        B child;
-
-        function test() public {
-            child = (new B).value(10)(); //construct a new B with 10 wei
-        }
-    }
-
 More Questions?
 ===============
 
