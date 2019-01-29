@@ -281,7 +281,7 @@ jobs:
           name: Install dependencies
           command: |
             apt-get -qq update
-            apt-get -qy install clang-7 libcvc4-dev libleveldb1v5 python-pip
+            apt-get -qy install clang-7 llvm-7-dev libcvc4-dev libleveldb1v5 python-pip
       - run: mkdir -p test_results
       - run:
           name: Run tests with ASAN
