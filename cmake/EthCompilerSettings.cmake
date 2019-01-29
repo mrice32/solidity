@@ -75,6 +75,30 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
 			# http://stackoverflow.com/questions/21617158/how-to-silence-unused-command-line-argument-error-with-clang-without-disabling-i
 			add_compile_options(-Qunused-arguments)
 
+	## FROM CABLE
+        # Sanitizers support.
+        set(SANITIZE OFF CACHE STRING "Build with the specified sanitizer")
+        if(SANITIZE)
+            # Set the linker flags first, they are required to properly test the compiler flag.
+            set(CMAKE_SHARED_LINKER_FLAGS "-fsanitize=${SANITIZE} ${CMAKE_SHARED_LINKER_FLAGS}")
+            set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=${SANITIZE} ${CMAKE_EXE_LINKER_FLAGS}")
+
+            set(test_name have_fsanitize_${SANITIZE})
+            check_cxx_compiler_flag(-fsanitize=${SANITIZE} ${test_name})
+            if(NOT ${test_name})
+                message(FATAL_ERROR "Unsupported sanitizer: ${SANITIZE}")
+            endif()
+            add_compile_options(-fno-omit-frame-pointer -fsanitize=${SANITIZE})
+
+            set(backlist_file ${PROJECT_SOURCE_DIR}/sanitizer-blacklist.txt)
+            if(EXISTS ${backlist_file})
+                check_cxx_compiler_flag(-fsanitize-blacklist=${backlist_file} have_fsanitize-blacklist)
+                if(have_fsanitize-blacklist)
+                    add_compile_options(-fsanitize-blacklist=${backlist_file})
+                endif()
+            endif()
+        endif()
+
 		elseif(EMSCRIPTEN)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --memory-init-file 0")
 			# Leave only exported symbols as public and aggressively remove others
