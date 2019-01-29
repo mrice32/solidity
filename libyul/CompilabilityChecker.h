@@ -34,13 +34,7 @@ namespace yul
 class CompilabilityChecker
 {
 public:
-	CompilabilityChecker(Dialect const& _dialect): m_dialect(_dialect) {}
-
-	int run(FunctionDefinition const& _function);
-	int run(Block const& _ast);
-
-private:
-	Dialect const& m_dialect;
+	static std::map<YulString, int> run(std::shared_ptr<Dialect> _dialect, Block const& _ast);
 };
 
 }

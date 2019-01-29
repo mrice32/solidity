@@ -20,26 +20,47 @@
 
 #include <libyul/CompilabilityChecker.h>
 
+#include <libyul/AsmAnalysis.h>
+#include <libyul/AsmAnalysisInfo.h>
+
 #include <libyul/backends/evm/EVMCodeTransform.h>
 #include <libyul/backends/evm/NirvanaAssembly.h>
 
+#include <liblangutil/EVMVersion.h>
+
 using namespace std;
 using namespace yul;
+using namespace dev;
+using namespace dev::solidity;
 
-int CompilabilityChecker::run(FunctionDefinition const& /*_function*/)
+std::map<YulString, int> CompilabilityChecker::run(std::shared_ptr<Dialect> _dialect, Block const& _ast)
 {
-	if (m_dialect.flavour == AsmFlavour::Yul)
-		return 0;
+	if (_dialect->flavour == AsmFlavour::Yul)
+		return {};
 
-//	EVMDialect const& evmDialect = dynamic_cast<EVMDialect const&>(m_dialect);
-//	NirvanaAssembly assembly;
-//	CodeTransform(assembly, analysisInfo, block, evmDialect, _optimize);
+	solAssert(_dialect->flavour == AsmFlavour::Strict, "");
 
-	return 0;
-}
+	EVMDialect const& evmDialect = dynamic_cast<EVMDialect const&>(*_dialect);
+	NirvanaAssembly assembly;
 
-int CompilabilityChecker::run(Block const& /*_ast*/)
-{
-	// TODO
-	return 0;
+	bool optimize = true;
+	yul::AsmAnalysisInfo analysisInfo =
+		yul::AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, EVMVersion(), _ast);
+	CodeTransform transform(assembly, analysisInfo, _ast, evmDialect, optimize);
+	try
+	{
+		transform(_ast);
+		cout << "No error" << endl;
+	}
+	catch (StackTooDeepError const&)
+	{
+		cout << "Got error" << endl;
+		solAssert(!transform.stackErrors().empty(), "Got stack too deep exception that was not stored.");
+	}
+
+	std::map<YulString, int> functions;
+	for (StackTooDeepError const& error: transform.stackErrors())
+		functions[error.functionName] = max(error.depth, functions[error.functionName]);
+
+	return functions;
 }

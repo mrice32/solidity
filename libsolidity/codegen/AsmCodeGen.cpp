@@ -206,4 +206,6 @@ void CodeGenerator::assemble(
 				(message ? ": " + *message : ".")
 			));
 	}
+	// TODO assert that the transfrom does not have any stack errors (also other
+	// instances of that object)
 }

@@ -45,7 +45,7 @@
 #include <numeric>
 
 // Change to "define" to output all intermediate code
-#define SOL_OUTPUT_ASM
+#undef SOL_OUTPUT_ASM
 #ifdef SOL_OUTPUT_ASM
 #include <libyul/AsmPrinter.h>
 #endif

@@ -549,7 +549,6 @@ void CodeTransform::operator()(FunctionDefinition const& _function)
 		StackTooDeepError error(_error);
 		if (error.functionName.empty())
 			error.functionName = _function.name;
-		m_stackErrors.emplace_back(std::move(error));
 		stackError(error, height);
 	}
 
@@ -580,7 +579,7 @@ void CodeTransform::operator()(FunctionDefinition const& _function)
 				to_string(stackLayout.size() - 17) +
 				" parameters or return variables too many to fit the stack size."
 			);
-			stackError(error, localStackAdjustment);
+			stackError(error, m_assembly.stackHeight() - _function.parameters.size());
 		}
 		else
 		{
@@ -599,7 +598,6 @@ void CodeTransform::operator()(FunctionDefinition const& _function)
 				solAssert(i == stackLayout[i], "Error reshuffling stack.");
 		}
 	}
-
 	if (m_evm15)
 		m_assembly.appendReturnsub(_function.returnVariables.size(), stackHeightBefore);
 	else

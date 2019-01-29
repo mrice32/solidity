@@ -124,6 +124,8 @@ public:
 	{
 	}
 
+	std::vector<StackTooDeepError> const& stackErrors() const { return m_stackErrors; }
+
 protected:
 	using Context = CodeTransformContext;
 
